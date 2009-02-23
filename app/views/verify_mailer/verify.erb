@@ -1,0 +1,9 @@
+Hello,
+
+You have signed up for <%= $site_name %>, with the user name of <%= @user.username %>.
+
+Please click the following link (or copy it into your browser's url bar) to verify your email and activate your account.
+
+<%= url_for(:host => $site_url, :controller => "user", :action => "verify", :id => @user.id, :code => @user.verify_code) %>
+
+Thank you.

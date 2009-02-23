@@ -1,0 +1,8 @@
+<% options = { :action => "signin" } 
+if @intended_method
+  options.merge!({:method => @intended_method})
+end %>
+
+
+
+<%= render :partial => "user/signin_form" %>

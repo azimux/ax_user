@@ -1,0 +1,19 @@
+<% @user ||= User.new -%>
+<% if session[:user] -%>
+  You are logged in as <%= @user.username -%>
+  <%= link_to "Logout", :controller => :user, :action => :signout -%>
+<% else -%>
+  <% form_tag(:controller => "user", :action => "signin") do -%>
+    <b>Username:</b>
+    <%= text_field_tag "username", params[:username], :size=>"5" -%>
+
+    <b>Password:</b>
+    <%= password_field_tag "password","", :size=>"5" -%>
+
+    <%= submit_tag "Sign in" -%>
+  <% end -%>
+  <%= link_to "Register", :controller => "user", 
+    :action => "register" -%>
+  <%= link_to "Forgot your password?", :controller => "user", 
+    :action => "password_forgot" -%>
+<% end %>
