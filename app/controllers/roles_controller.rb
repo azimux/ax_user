@@ -1,9 +1,9 @@
 class RolesController < ApplicationController
   include Azimux::RequireLoginController
-  
+
   require_login
   require_role "admin"
-  
+
   # GET /roles
   # GET /roles.xml
   def index
@@ -51,20 +51,20 @@ class RolesController < ApplicationController
         raise "Expected Hash"
       end
     end
-    
+
     hash = hash.dup
     children = hash.delete('children')
     raise "no children listed" if children.nil?
     children = children.split("\n").map(&:strip).select {|s|!s.blank?}
     children.map! {|p| Role.find_by_name(p)}
     raise "bad roles" if children.any? {|p|p.blank?}
-    
+
     role ||= Role.new(hash)
     role.children = children
-    
+
     return role, hash
   end
-  
+
   # POST /roles
   # POST /roles.xml
   def create

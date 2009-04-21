@@ -21,7 +21,6 @@ class UserController < ApplicationController
       format.html
       #format.xml  { render :xml => @places }
     end
-
   end
 
   def signout
@@ -58,11 +57,9 @@ class UserController < ApplicationController
   end
 
   def password_forgot
-
   end
 
   def password_reset_link_sent
-
   end
 
   def password_enter_new
@@ -90,8 +87,6 @@ class UserController < ApplicationController
         return
       end
 
-
-
       #xxx make it check minutes?
       User.transaction do
         user.password = params[:password1]
@@ -102,7 +97,6 @@ class UserController < ApplicationController
           flash.now[:error] = "Something went wrong"
         end
       end
-
 
     end
   end
