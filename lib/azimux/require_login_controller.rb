@@ -18,6 +18,8 @@ module Azimux
           User.find(session[:user])
         rescue ActiveRecord::RecordNotFound
         end
+      else
+        @user = nil
       end
       @user
     end
