@@ -1,5 +1,9 @@
 
 class UserController < ApplicationController
+  if Azimux::AxUser.ssl_enabled?
+    Azimux::AxUser.install_ssl_rules
+  end
+
   def signin
     if params[:username] && params[:password]
       if !(user = User.authenticate(params[:username], params[:password]))
