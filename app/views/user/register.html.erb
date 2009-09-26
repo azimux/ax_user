@@ -1,9 +1,12 @@
 <h1>Register</h1>
-
-<%= error_messages_for :user, :object_name => "", 
+<%
+url_for_opts = {:protocol => "https"} if Azimux::AxUser.ssl_enabled?
+url_for_opts ||= {}
+%>
+<%= error_messages_for :user, :object_name => "",
   :header_message => "Some errors occured while trying to register:" %>
 
-<% form_for(:user, @user, :url => {:action => :signup}) do |f| %>
+<% form_for(:user, @user, :url => url_for_opts.merge(:action => :signup)) do |f| %>
   <p>
     <b>Username</b><br />
     <%= f.text_field :username %>
@@ -18,7 +21,7 @@
     <b>Password</b><br />
     <%= password_field_tag :password1 %>
   </p>
-<p>
+  <p>
     <b>Verify password</b><br />
     <%= password_field_tag :password2 %>
   </p>
