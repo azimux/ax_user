@@ -24,7 +24,6 @@ module Azimux
 
     def self.install_ssl_rules
       UserController.class_eval do
-        include SslRequirement
         ssl_required :new, :create, :edit, :delete, :show, :index, :update,
           :signup, :register, :complete_signin, :signin, :signout, :verify,
           :password_enter_new, :password_forgot, :password_request_reset_link,
