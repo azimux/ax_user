@@ -4,10 +4,6 @@ module Azimux
       session[:user]
     end
 
-    def signin_path
-      url_for :controller => 'user', :action => 'signin'
-    end
-
     def user
       @user || prep_user_variable
     end
@@ -30,7 +26,7 @@ module Azimux
 
 
     def self.included(base)
-      base.helper_method :signed_in?, :signin_path, :user, :prep_user_variable,
+      base.helper_method :signed_in?, :user, :prep_user_variable,
         :in_role?
       base.before_filter :prep_user_variable
 
@@ -45,11 +41,18 @@ module Azimux
 
       def base.require_role role, options = {}
         options[:except] ||= []
-        if options[:except].class != Array
+
+        if options[:except] && !options[:except].is_a?(Array)
           options[:except] = [options[:except]]
         end
-        before_filter(:except => ([:signin, :signout] + options[:except]),
-          :only => options[:only]) do |c|
+
+        options[:except] += [:signin, :signout]
+
+        if options[:only] && !options[:only].is_a?(Array)
+          options[:only] = [options[:only]]
+        end
+
+        before_filter(options) do |c|
           c.instance_eval do
             u = c.user
 
@@ -61,15 +64,13 @@ module Azimux
           end
         end
       end
+
     end
-
-
-
-
 
     def redirect_to_permission_denied
-      redirect_to :controller => "user", :action => "permission_denied"
+      redirect_to permission_denied_url
     end
+
 
     def check_authentication
       if !session[:user]
