@@ -18,6 +18,7 @@ module Azimux
     def self.enable_ssl
       @enable_ssl
     end
+
     def self.ssl_enabled?
       @enable_ssl
     end
@@ -35,6 +36,10 @@ module Azimux
       UserController.class_eval do
         ssl_required
       end
+    end
+
+    def self.additional_registration_models
+      @additional_registration_models ||= []
     end
   end
 end

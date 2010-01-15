@@ -111,6 +111,9 @@ class UserController < ApplicationController
 
   def register
     @user = User.new
+    Azimux::AxUser.additional_registration_models.each do |model|
+      instance_eval(&model.new_proc)
+    end
   end
 
   def signup
@@ -136,7 +139,9 @@ class UserController < ApplicationController
     @user.verify_code = Azimux.generate_verify_code
 
     User.transaction do
-      if @user.save
+      if @user.save && Azimux::AxUser.additional_registration_models.map do |model|
+          instance_eval(&model.create_proc)
+        end.all?
         VerifyMailer.deliver_verify(@user)
       else
         render :action => :register

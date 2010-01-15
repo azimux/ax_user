@@ -21,10 +21,19 @@ url_for_opts ||= {}
     <b>Password</b><br />
     <%= password_field_tag :password1 %>
   </p>
+
   <p>
     <b>Verify password</b><br />
     <%= password_field_tag :password2 %>
   </p>
+
+  <% Azimux::AxUser.additional_registration_models.each do |model| %>
+    <% model = model.name.underscore
+    fields_for model do |builder| -%>
+      <%= render :partial  => "#{model.pluralize}/fields_for",
+        :locals => {:builder => builder} -%>
+    <% end %>
+  <% end -%>
 
   <p>
     <%= f.submit "Register" %>
