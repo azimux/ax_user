@@ -144,6 +144,7 @@ class UserController < ApplicationController
         end.all?
         VerifyMailer.deliver_verify(@user)
       else
+        rollback_db_transaction
         render :action => :register
       end
     end
