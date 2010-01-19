@@ -135,7 +135,6 @@ class UserController < ApplicationController
     @user.verified = false
     @user.password = params[:password1]
 
-
     @user.verify_code = Azimux.generate_verify_code
 
     User.transaction do

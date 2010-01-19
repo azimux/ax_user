@@ -67,12 +67,15 @@ module Azimux
       end
 
       def require_login options = {}
-        options[:except] ||= []
-        if options[:except].class != Array
-          options[:except] = [options[:except]]
+        if options[:only].blank?
+          options[:except] ||= []
+          if options[:except].class != Array
+            options[:except] = [options[:except]]
+          end
+          options[:except] += [:signin, :signout]
         end
-        before_filter :check_authentication,
-          :except => [:signin, :signout] + options[:except]
+
+        before_filter :check_authentication, options
       end
 
       def require_role role, options = {}
