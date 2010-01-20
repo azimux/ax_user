@@ -1,0 +1,9 @@
+<% form_for @user, :url => update_verification_user_url(@user) do |f| %>
+  <%= f.error_messages %>
+  <p>
+    Please click to activate your account.
+  </p>
+  <%= hidden_field_tag :code, params[:code] %>
+
+  <%= f.submit "Activate my account!" %>
+<% end %>

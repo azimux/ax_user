@@ -42,29 +42,6 @@ class RolesController < ApplicationController
     @role = Role.find(params[:id])
   end
 
-  def fill_role(role, hash = nil)
-    unless hash
-      if role.is_a? Hash
-        hash = role
-        role = nil
-      else
-        raise "Expected Hash"
-      end
-    end
-
-    hash = hash.dup
-    children = hash.delete('children')
-    raise "no children listed" if children.nil?
-    children = children.split("\n").map(&:strip).select {|s|!s.blank?}
-    children.map! {|p| Role.find_by_name(p)}
-    raise "bad roles" if children.any? {|p|p.blank?}
-
-    role ||= Role.new(hash)
-    role.children = children
-
-    return role, hash
-  end
-
   # POST /roles
   # POST /roles.xml
   def create
@@ -115,5 +92,29 @@ class RolesController < ApplicationController
         format.xml  { head :ok }
       end
     end
+  end
+
+  protected
+  def fill_role(role, hash = nil)
+    unless hash
+      if role.is_a? Hash
+        hash = role
+        role = nil
+      else
+        raise "Expected Hash"
+      end
+    end
+
+    hash = hash.dup
+    children = hash.delete('children')
+    raise "no children listed" if children.nil?
+    children = children.split("\n").map(&:strip).select {|s|!s.blank?}
+    children.map! {|p| Role.find_by_name(p)}
+    raise "bad roles" if children.any? {|p|p.blank?}
+
+    role ||= Role.new(hash)
+    role.children = children
+
+    return role, hash
   end
 end

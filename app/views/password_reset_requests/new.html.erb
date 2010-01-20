@@ -1,0 +1,16 @@
+<% form_for(@password_reset_request) do |f| %>
+  <%= f.error_messages %>
+
+  <p>Please enter your username or email address below.
+    You will recieve an email with a link to reset your password.
+  </p>
+
+  <p>
+    <b>Username OR Email:</b>
+    <%= text_field_tag "username_or_email", @username_or_email %>
+  </p>
+
+  <%= f.submit "Request Password Reset" %>
+<% end %>
+
+Not registered?  <%= link_to "Register", new_user_url %>

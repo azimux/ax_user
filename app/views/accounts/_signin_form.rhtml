@@ -4,10 +4,12 @@ url_for_opts ||= {}
 %>
 <% if session[:user] %>
   You are logged in as <%= @user.username %>.<br/>
-  <%= link_to "Logout", :controller => :user, :action => :signout %>
+  <%= link_to "Logout", logout_url %>
 <% else %>
 
-  <% form_tag url_for_opts.merge(:controller => "user", :action => "signin") do %>
+  <% form_tag login_url(url_for_opts) do %>
+    <%= error_messages_for :username %>
+
     <p>
       <b>Username:</b>
       <%= text_field_tag "username", params[:username] %>
@@ -21,8 +23,6 @@ url_for_opts ||= {}
     <%= submit_tag "Sign in" %>
   <% end %>
 
-  Not registered?  <%= link_to "Register Here", url_for_opts.merge(:controller => "user",
-    :action => "register") %><br/>
-  Forgot your password?  <%= link_to "Click Here", url_for_opts.merge(:controller => "user",
-    :action => "password_forgot") %>
+  Not registered?  <%= link_to "Register Here", new_user_url %><br/>
+  Forgot your password?  <%= link_to "Click Here", new_password_reset_request_url %>
 <% end %>

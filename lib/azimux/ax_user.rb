@@ -6,12 +6,20 @@ module Azimux
     def self.enable_ssl= boolean
       @enable_ssl = boolean
 
-      if defined?(UserController)
+      if defined?(UsersController)
         if @enable_ssl
           install_ssl_rules
         else
           uninstall_ssl_rules
         end
+      end
+    end
+
+    def self.protocol(protocol = "http")
+      if protocol == "https" && !ssl_enabled?
+        "http"
+      else
+        protocol
       end
     end
 
@@ -24,17 +32,38 @@ module Azimux
     end
 
     def self.install_ssl_rules
-      UserController.class_eval do
-        ssl_required :new, :create, :edit, :delete, :show, :index, :update,
-          :signup, :register, :complete_signin, :signin, :signout, :verify,
-          :password_enter_new, :password_forgot, :password_request_reset_link,
-          :password_reset_complete, :password_reset_link_sent
+      if !@ax_ssl_installed
+        UsersController.class_eval do
+          ssl_required :create, :edit, :delete, :show, :new, :index, :update,
+            :edit_verification,
+            :update_verification,
+            :edit_password,
+            :update_password
+        end
+        AccountsController.class_eval do
+          ssl_required :create, :edit, :delete, :show, :new, :index, :update,
+            :signin,
+            :signout
+        end
+        PasswordResetRequestsController.class_eval do
+          ssl_required :create, :edit, :delete, :show, :new, :index, :update
+        end
+        @ax_ssl_installed = true
       end
     end
 
     def self.uninstall_ssl_rules
-      UserController.class_eval do
-        ssl_required
+      if @ax_ssl_installed
+        UsersController.class_eval do
+          ssl_required
+        end
+        AccountsController.class_eval do
+          ssl_required
+        end
+        PasswordResetRequestsController.class_eval do
+          ssl_required
+        end
+        @ax_ssl_installed = false
       end
     end
 

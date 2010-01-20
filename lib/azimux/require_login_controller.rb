@@ -47,7 +47,7 @@ module Azimux
         #session[:intended_method] = request.method
         #session[:intended_path] = request.path
 
-        redirect_to :controller => "user", :action => "signin"
+        redirect_to login_url
       end
     end
 

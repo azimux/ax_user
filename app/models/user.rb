@@ -1,7 +1,7 @@
 require 'digest/sha2'
 
 class User < ActiveRecord::Base
-  has_one :forgot_password_code, :order => 'created_at DESC'
+  has_many :password_reset_requests, :order => 'created_at DESC'
   has_and_belongs_to_many :roles
   before_validation_on_create :clobber_existing_unverified_user
 
@@ -57,6 +57,10 @@ class User < ActiveRecord::Base
   def username= uname
     self.url_safe_name = User.url_safe_name(uname)
     write_attribute(:username, uname)
+  end
+
+  def password_reset_request
+    password_reset_requests.first
   end
 end
 
