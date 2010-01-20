@@ -1,13 +1,23 @@
 class AccountsController < ApplicationController
   def signin
-    if params[:username] && params[:password]
-      if !(user = User.authenticate(params[:username], params[:password]))
-        flash.now[:error] = "Invalid username or password."
+    @username = params[:username]
+
+    store_errors = proc do |msg|
+      @form ||= OpenStruct.new
+      @form.errors ||= ActiveRecord::Errors.new(self)
+      @form.errors.add_to_base(msg)
+    end
+
+    if !@username.blank? || !params[:password].blank?
+      if !(user = User.authenticate(@username, params[:password]))
+        msg = "Invalid username or password."
+        store_errors.call msg
       else
         #make sure the user has validated.
         if !user.verified?
-          flash.now[:error] = "You need to validate your account
+          msg = "You need to validate your account
               before you can sign in.  Please check your email for instructions."
+          store_errors.call msg
         else
           #user successfully signed in
           redirect_to complete_signin(user)

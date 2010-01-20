@@ -7,8 +7,6 @@ url_for_opts ||= {}
   <%= link_to "Logout", logout_url -%>
 <% else -%>
   <% form_tag login_url(url_for_opts) do -%>
-    <%= error_messages_for :username %>
-
     <b>Username:</b>
     <%= text_field_tag "username", params[:username], :size=>"5" -%>
 

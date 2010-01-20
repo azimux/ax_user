@@ -8,7 +8,8 @@ url_for_opts ||= {}
 <% else %>
 
   <% form_tag login_url(url_for_opts) do %>
-    <%= error_messages_for :username %>
+    <%= error_messages_for :form, 
+      :message => nil, :header_message => nil %>
 
     <p>
       <b>Username:</b>
