@@ -37,7 +37,7 @@ class UsersController < ApplicationController
         end.all?
         VerifyMailer.deliver_verify(@user)
       else
-        rollback_db_transaction
+        User.connection.rollback_db_transaction
         render :action => "new"
       end
     end
@@ -76,7 +76,7 @@ class UsersController < ApplicationController
             flash[:notice] = 'Password was successfully changed.  You may now login'
             format.html { redirect_to login_url }
           else
-            rollback_db_transaction
+            User.connection.rollback_db_transaction
             format.html { render :action => "edit_password" }
           end
         end
