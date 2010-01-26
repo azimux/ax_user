@@ -13,32 +13,42 @@ class UsersController < ApplicationController
   def create
     @user = User.new(params[:user])
 
-    #Make sure the passwords match
-    if params[:password1] != params[:password2]
-      @user.errors.add(:password1, "The passwords you entered did not match.")
-      render :action => "new"
-      return
-    end
-
-    if params[:password1].blank?
-      @user.errors.add(:password1, "You must provide a password.")
-      render :action => "new"
-      return
-    end
-
-    @user.verified = false
-    @user.password = params[:password1]
-
-    @user.verify_code = Azimux.generate_verify_code
-
     User.transaction do
-      if @user.save && Azimux::AxUser.additional_registration_models.map do |model|
-          instance_eval(&model.create_proc)
-        end.all?
-        VerifyMailer.deliver_verify(@user)
-      else
-        User.connection.rollback_db_transaction
+      #Make sure the passwords match
+      if params[:password1] != params[:password2]
+        @user.errors.add(:password1, "The passwords you entered did not match.")
         render :action => "new"
+        return
+      end
+
+      if params[:password1].blank?
+        @user.errors.add(:password1, "You must provide a password.")
+        render :action => "new"
+        return
+      end
+
+      @user.verified = false
+      @user.password = params[:password1]
+
+      @user.verify_code = Azimux.generate_verify_code
+
+      models = Azimux::AxUser.additional_registration_models
+      objects = models.map{|m|instance_eval(&m.load_proc)}
+
+      ax_multimodel_transaction objects, :already_in => @user do
+        ax_multimodel_if([@user] + objects,
+          :if => proc {
+            @user.save && models.map do |model|
+              instance_eval(&model.save_proc)
+            end.all?
+          },
+          :is_true => proc {
+            VerifyMailer.deliver_verify(@user)
+          },
+          :is_false  => proc {
+            render :action => "new"
+          }
+        )
       end
     end
   end
