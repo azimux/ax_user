@@ -11,9 +11,11 @@ class UsersController < ApplicationController
   end
 
   def create
-    @user = User.new(params[:user])
-
     User.transaction do
+      @user = User.new(params[:user])
+      models = Azimux::AxUser.additional_registration_models
+      objects = models.map{|m|instance_eval(&m.load_proc)}
+
       #Make sure the passwords match
       if params[:password1] != params[:password2]
         @user.errors.add(:password1, "The passwords you entered did not match.")
@@ -31,9 +33,6 @@ class UsersController < ApplicationController
       @user.password = params[:password1]
 
       @user.verify_code = Azimux.generate_verify_code
-
-      models = Azimux::AxUser.additional_registration_models
-      objects = models.map{|m|instance_eval(&m.load_proc)}
 
       ax_multimodel_transaction objects, :already_in => @user do
         ax_multimodel_if([@user] + objects,

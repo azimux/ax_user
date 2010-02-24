@@ -29,11 +29,8 @@ url_for_opts ||= {}
   </p>
 
   <% Azimux::AxUser.additional_registration_models.each do |model| %>
-    <% model = model.name.underscore
-    fields_for model do |builder| -%>
-      <%= render :partial  => "#{model.pluralize}/fields_for",
-        :locals => {:builder => builder} -%>
-    <% end %>
+    <% model = model.name.underscore %>
+    <%= render :partial  => "#{model.pluralize}/fields_for" -%>
   <% end -%>
 
   <p>
