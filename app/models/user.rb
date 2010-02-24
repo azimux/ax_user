@@ -62,5 +62,11 @@ class User < ActiveRecord::Base
   def password_reset_request
     password_reset_requests.first
   end
+
+  #dummy methods for providing blank password fields
+  def password1
+  end
+  def password2
+  end
 end
 

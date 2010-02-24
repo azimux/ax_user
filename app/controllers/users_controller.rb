@@ -12,19 +12,24 @@ class UsersController < ApplicationController
 
   def create
     User.transaction do
+      password1 = params[:user].delete :password1
+      password2 = params[:user].delete :password2
+
       @user = User.new(params[:user])
       models = Azimux::AxUser.additional_registration_models
       objects = models.map{|m|instance_eval(&m.load_proc)}
 
       #Make sure the passwords match
-      if params[:password1] != params[:password2]
+      if password1 != password2
         @user.errors.add(:password1, "The passwords you entered did not match.")
+        @user.errors.add(:password2, "The passwords you entered did not match.")
         render :action => "new"
         return
       end
 
-      if params[:password1].blank?
+      if password1.blank?
         @user.errors.add(:password1, "You must provide a password.")
+        @user.errors.add(:password2, "You must verify your password.")
         render :action => "new"
         return
       end

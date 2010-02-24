@@ -3,7 +3,7 @@
 url_for_opts = {:protocol => "https"} if Azimux::AxUser.ssl_enabled?
 url_for_opts ||= {}
 %>
-<%= error_messages_for :user, :object_name => "",
+<%#= error_messages_for :user, :object_name => "",
   :header_message => "Some errors occured while trying to register:" %>
 
 <% form_for(@user) do |f| %>
@@ -20,12 +20,12 @@ url_for_opts ||= {}
 
   <p>
     <b>Password</b><br />
-    <%= password_field_tag :password1 %>
+    <%= f.password_field :password1 %>
   </p>
 
   <p>
     <b>Verify password</b><br />
-    <%= password_field_tag :password2 %>
+    <%= f.password_field :password2 %>
   </p>
 
   <% Azimux::AxUser.additional_registration_models.each do |model| %>
