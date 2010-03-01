@@ -20,7 +20,7 @@ class User < ActiveRecord::Base
     other_user.destroy if other_user
   end
 
-  def self.authenticate(username,password)
+  def self.authenticate(username, password)
     user = User.find(:first, :conditions => ['username = ?', username])
     if user.blank? || Digest::SHA256.hexdigest(password + user.password_salt) != user.password_hash
       return nil

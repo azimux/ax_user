@@ -35,7 +35,7 @@ class UsersController < ApplicationController
       end
 
       @user.verified = false
-      @user.password = params[:password1]
+      @user.password = password1
 
       @user.verify_code = Azimux.generate_verify_code
 
@@ -62,43 +62,51 @@ class UsersController < ApplicationController
   end
 
   def update_password
-    @user = User.find(params[:id])
-
-    code = params[:code]
     password1 = params[:password1]
     password2 = params[:password2]
+    password = params[:password]
+    @user = User.find(params[:id])
+
+    if params[:code]
+      code = params[:code]
+
+      if !(code.length == Azimux::VERIFY_CODE_LENGTH &&
+            @user.password_reset_request &&
+            @user.password_reset_request.code == code)
+          flash[:notice] = "The reset password code that you used from your email is not valid, try again."
+          redirect_to new_password_reset_request_url
+        return
+      end
+    else
+      unless User.authenticate(@user.username, password)
+        @user.errors.add_to_base("The password you entered doesn't match your current password")
+        render :action => "edit_password"
+        return
+      end
+    end
 
     if password1 != password2
-      errors.add(:password1, "The passwords you entered did not match.")
+      @user.errors.add_to_base("The passwords you entered did not match.")
       render :action => "edit_password"
       return
     end
 
     if :password1.blank?
-      errors.add(:password1, "You must provide a password.")
+      @user.errors.add_to_base("You must provide a password.")
       render :action => "edit_password"
       return
     end
 
-    if !(code.length == Azimux::VERIFY_CODE_LENGTH &&
-          @user.password_reset_request &&
-          @user.password_reset_request.code == code)
-      User.transaction do
-        @user.password = password1
-        respond_to do |format|
-          if @user.save && @user.password_reset_requests.destroy_all
-            flash[:notice] = 'Password was successfully changed.  You may now login'
-            format.html { redirect_to login_url }
-          else
-            User.connection.rollback_db_transaction
-            format.html { render :action => "edit_password" }
-          end
-        end
-      end
-    else
+    
+    User.transaction do
+      @user.password = password1
       respond_to do |format|
-        flash[:error] = "The reset password code that you used from your email is not valid, try again."
-        format.html { redirect_to new_password_reset_request }
+        if @user.save && @user.password_reset_requests.destroy_all
+          flash[:notice] = 'Password was successfully changed.  You may now login'
+          format.html { redirect_to login_url }
+        else
+          raise "Something unexpectedly prevented this user #{@user.username} #{@user.id} from updating their password."
+        end
       end
     end
   end
