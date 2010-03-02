@@ -1,0 +1,61 @@
+<% if mode == "new" %>
+  <h1>Register</h1>
+<% elsif mode == "edit" %>
+  <h1>Update your account settings</h1>
+<% else
+  raise "Invalid mode: #{mode}"
+end
+%>
+<%
+url_for_opts = {:protocol => "https"} if Azimux::AxUser.ssl_enabled?
+url_for_opts ||= {}
+%>
+<%#= error_messages_for :user, :object_name => "",
+:header_message => "Some errors occured while trying to register:" %>
+
+<% if mode == "edit" %>
+  <%#= link_to "Change password", edit_password_user_url(user) -%>
+  <% form_tag edit_password_user_url(user), :method => "get" do %>
+    <%= submit_tag "Change Password " -%>
+  <% end %>
+  <hr/>
+<% end %>
+
+
+<% form_for(@user) do |f| %>
+  <%= f.error_messages %>
+
+  <% if Azimux::AxUser.allow_username_edits %>
+    <p>
+      <b>Username</b><br />
+      <%= f.text_field :username %>
+    </p>
+  <% end %>
+
+  <p>
+    <b>E-mail address</b><br />
+    <%= f.text_field :email %>
+  </p>
+
+  <% if mode == "new" %>
+    <p>
+      <b>Password</b><br />
+      <%= f.password_field :password1 %>
+    </p>
+
+    <p>
+      <b>Verify password</b><br />
+      <%= f.password_field :password2 %>
+    </p>
+  <% end %>
+
+  <% Azimux::AxUser.additional_registration_models.each do |model| %>
+    <% model = model.name.underscore %>
+    <%= render :partial  => "#{model.pluralize}/fields_for",
+      :locals => {:mode => mode} -%>
+  <% end -%>
+
+  <p>
+    <%= f.submit mode == "new" ? "Register" : "Save Changes" %>
+  </p>
+<% end %>

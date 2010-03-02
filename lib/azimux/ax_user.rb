@@ -3,6 +3,10 @@
 
 module Azimux
   class AxUser
+    def self.allow_username_edits
+      @ax_allow_username_edits
+    end
+
     def self.enable_ssl= boolean
       @enable_ssl = boolean
 

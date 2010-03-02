@@ -1,9 +1,9 @@
-<% @user ||= User.new
+<% user = self.user || User.new
 url_for_opts = {:protocol => "https", :only_path => false} if Azimux::AxUser.ssl_enabled?
 url_for_opts ||= {}
 -%>
 <% if session[:user] -%>
-  You are logged in as <%= @user.username -%>
+  You are logged in as <%= user.username -%>
   <%= link_to "Logout", logout_url -%>
 <% else -%>
   <% form_tag login_url(url_for_opts) do -%>

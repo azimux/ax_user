@@ -1,4 +1,6 @@
 class UsersController < ApplicationController
+  require_login :only => [:edit, :update]
+
   if Azimux::AxUser.ssl_enabled?
     Azimux::AxUser.install_ssl_rules
   end
@@ -17,7 +19,7 @@ class UsersController < ApplicationController
 
       @user = User.new(params[:user])
       models = Azimux::AxUser.additional_registration_models
-      objects = models.map{|m|instance_eval(&m.load_proc)}
+      objects = models.map{|m|instance_eval(&m.create_init_proc)}
 
       #Make sure the passwords match
       if password1 != password2
@@ -43,7 +45,7 @@ class UsersController < ApplicationController
         ax_multimodel_if([@user] + objects,
           :if => proc {
             @user.save && models.map do |model|
-              instance_eval(&model.save_proc)
+              instance_eval(&model.create_proc)
             end.all?
           },
           :is_true => proc {
@@ -51,6 +53,47 @@ class UsersController < ApplicationController
           },
           :is_false  => proc {
             render :action => "new"
+          }
+        )
+      end
+    end
+  end
+
+  def edit
+    @user = User.find(params[:id])
+    Azimux::AxUser.additional_registration_models.each do |model|
+      instance_eval(&model.edit_proc)
+    end
+  end
+
+  def update
+    User.transaction do
+      @user = User.find(params[:id])
+
+      unless Azimux::AxUser.allow_username_edits
+        params[:user].delete(:username)
+      end
+
+      if @user.id != user.id
+        raise "user #{user.id} trying to change password of user #{@user.id}"
+      end
+
+      models = Azimux::AxUser.additional_registration_models
+      objects = models.map{|m|instance_eval(&m.update_init_proc)}
+
+      ax_multimodel_transaction objects, :already_in => @user do
+        ax_multimodel_if([@user] + objects,
+          :if => proc {
+            @user.update_attributes(@user.attributes.merge(params[:user])) && models.map do |model|
+              instance_eval(&model.update_proc)
+            end.all?
+          },
+          :is_true => proc {
+            flash[:notice] = "Successfully updated your account settings"
+            redirect_to edit_user_url(@user)
+          },
+          :is_false  => proc {
+            render :action => "edit"
           }
         )
       end
@@ -73,8 +116,8 @@ class UsersController < ApplicationController
       if !(code.length == Azimux::VERIFY_CODE_LENGTH &&
             @user.password_reset_request &&
             @user.password_reset_request.code == code)
-          flash[:notice] = "The reset password code that you used from your email is not valid, try again."
-          redirect_to new_password_reset_request_url
+        flash[:notice] = "The reset password code that you used from your email is not valid, try again."
+        redirect_to new_password_reset_request_url
         return
       end
     else
@@ -97,7 +140,7 @@ class UsersController < ApplicationController
       return
     end
 
-    
+
     User.transaction do
       @user.password = password1
       respond_to do |format|

@@ -5,7 +5,9 @@ class User < ActiveRecord::Base
   has_and_belongs_to_many :roles
   before_validation_on_create :clobber_existing_unverified_user
 
-  attr_protected :url_safe_name, :password_hash, :password_salt, :verified
+  to_protect = :url_safe_name, :password_hash, :password_salt, :verified
+  to_protect << :username unless Azimux::AxUser.allow_username_edits
+  attr_protected to_protect
 
   validates_uniqueness_of :username
   validates_uniqueness_of :url_safe_name

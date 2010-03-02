@@ -5,19 +5,19 @@ module Azimux
     end
 
     def user
-      @user || prep_user_variable
+      @ax_user || prep_user_variable
     end
 
     def prep_user_variable
       if session[:user]
-        @user ||= begin
+        @ax_user ||= begin
           User.find(session[:user])
         rescue ActiveRecord::RecordNotFound
         end
       else
-        @user = nil
+        @ax_user = nil
       end
-      @user
+      @ax_user
     end
 
     def in_role? role
