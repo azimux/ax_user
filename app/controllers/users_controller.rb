@@ -19,29 +19,30 @@ class UsersController < ApplicationController
 
       @user = User.new(params[:user])
       models = Azimux::AxUser.additional_registration_models
-      objects = models.map{|m|instance_eval(&m.create_init_proc)}
 
-      #Make sure the passwords match
-      if password1 != password2
-        @user.errors.add(:password1, "The passwords you entered did not match.")
-        @user.errors.add(:password2, "The passwords you entered did not match.")
-        render :action => "new"
-        return
-      end
+      ax_multimodel_transaction models, :already_in => User do
+        objects = models.map{|m|instance_eval(&m.create_init_proc)}
 
-      if password1.blank?
-        @user.errors.add(:password1, "You must provide a password.")
-        @user.errors.add(:password2, "You must verify your password.")
-        render :action => "new"
-        return
-      end
+        #Make sure the passwords match
+        if password1 != password2
+          @user.errors.add(:password1, "The passwords you entered did not match.")
+          @user.errors.add(:password2, "The passwords you entered did not match.")
+          render :action => "new"
+          return
+        end
 
-      @user.verified = false
-      @user.password = password1
+        if password1.blank?
+          @user.errors.add(:password1, "You must provide a password.")
+          @user.errors.add(:password2, "You must verify your password.")
+          render :action => "new"
+          return
+        end
 
-      @user.verify_code = Azimux.generate_verify_code
+        @user.verified = false
+        @user.password = password1
 
-      ax_multimodel_transaction objects, :already_in => @user do
+        @user.verify_code = Azimux.generate_verify_code
+
         ax_multimodel_if([@user] + objects,
           :if => proc {
             @user.save && models.map do |model|
@@ -53,6 +54,7 @@ class UsersController < ApplicationController
           },
           :is_false  => proc {
             render :action => "new"
+            raise Azimux::MultimodelTransactions::Rollback
           }
         )
       end
