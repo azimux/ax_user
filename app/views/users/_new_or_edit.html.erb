@@ -25,7 +25,7 @@ url_for_opts ||= {}
 <% form_for(@user) do |f| %>
   <%= f.error_messages %>
 
-  <% if Azimux::AxUser.allow_username_edits %>
+  <% if mode == "new" || Azimux::AxUser.allow_username_edits %>
     <p>
       <b>Username</b><br />
       <%= f.text_field :username %>
