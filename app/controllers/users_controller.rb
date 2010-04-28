@@ -171,12 +171,7 @@ class UsersController < ApplicationController
         @user.verify_code = nil
 
         if @user.save!
-          if User.count == 1
-            #let's double check
-            user_in_db = User.find(:all)
-            raise "multiple users but count returned 1" unless user_in_db.size == 1
-            user_in_db = user_in_db.first
-            raise "wrong user" unless user_in_db.url_safe_name == @user.url_safe_name
+          if Role.find_by_name('admin').users.size == 0
             @user.roles << Role.find_by_name('admin')
             @user.save!
           end
