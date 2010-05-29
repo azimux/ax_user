@@ -58,7 +58,7 @@ class AccountsController < ApplicationController
     ].each {|key| session[("intended_" + key).to_sym] = nil}
 
     if !action || !controller
-      return "/"
+      return root_url
     end
 
     params_local.merge({:action => action, :controller => controller})
