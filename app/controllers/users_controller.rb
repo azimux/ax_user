@@ -1,5 +1,13 @@
 class UsersController < ApplicationController
-  require_login :only => [:edit, :update]
+  require_login :only => [:edit, :update, :destroy]
+  before_filter :only => [:edit, :update, :destroy] do |c|
+    c.instance_eval do
+      unless params[:id] && session[:user] && params[:id].to_i == session[:user].to_i &&
+          session[:user].to_i > 0
+        redirect_to_permission_denied
+      end
+    end
+  end
 
   if Azimux::AxUser.ssl_enabled?
     Azimux::AxUser.install_ssl_rules

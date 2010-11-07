@@ -20,7 +20,7 @@ class AccountsController < ApplicationController
           store_errors.call msg
         else
           #user successfully signed in
-          user.last_login = Time.zone.now
+          user.last_login = (Time.zone || Time).now
           user.save!
 
           redirect_to complete_signin(user)
