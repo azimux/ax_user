@@ -1,3 +1,5 @@
+require 'ostruct'
+
 class AccountsController < ApplicationController
   def signin
     @username = params[:username]
