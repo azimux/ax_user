@@ -19,7 +19,7 @@ class PasswordResetRequestsController < ApplicationController
       user ||= User.find_by_username(@username_or_email)
 
       if !user
-        errors.add(:username_or_email, "Could not find a user with that name or email address")
+        @password_reset_request.errors.add(:username_or_email, "Could not find a user with that name or email address")
         render :action => :new
         return
       end
