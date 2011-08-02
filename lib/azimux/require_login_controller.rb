@@ -28,7 +28,7 @@ module Azimux
     def self.included(base)
       base.helper_method :signed_in?, :user, :prep_user_variable,
         :in_role?
-      base.before_filter :prep_user_variable
+      #base.before_filter :prep_user_variable
 
       base.extend ClassMethods
     end

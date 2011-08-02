@@ -62,6 +62,10 @@ class AccountsController < ApplicationController
     ["path", "params", "controller", "action"
     ].each {|key| session[("intended_" + key).to_sym] = nil}
 
+    [:intended_action, :intended_params, :intended_controller].each do |key|
+      session.delete(key)
+    end
+
     if !action || !controller
       return root_url
     end
