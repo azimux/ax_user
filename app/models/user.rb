@@ -3,7 +3,7 @@ require 'digest/sha2'
 class User < ActiveRecord::Base
   has_many :password_reset_requests, :order => 'created_at DESC'
   has_and_belongs_to_many :roles
-  before_validation_on_create :clobber_existing_unverified_user
+  before_validation(:clobber_existing_unverified_user, :on => :create)
 
   to_protect = :url_safe_name, :password_hash, :password_salt, :verified
   to_protect << :username unless Azimux::AxUser.allow_username_edits

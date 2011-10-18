@@ -15,14 +15,14 @@ url_for_opts ||= {}
 
 <% if mode == "edit" %>
   <%#= link_to "Change password", edit_password_user_url(user) -%>
-  <% form_tag edit_password_user_url(user), :method => "get" do %>
+  <%= form_tag edit_password_user_url(user), :method => "get" do %>
     <%= submit_tag "Change Password " -%>
   <% end %>
   <hr/>
 <% end %>
 
 
-<% form_for(@user) do |f| %>
+<%= form_for(@user) do |f| %>
   <%= f.error_messages %>
 
   <% if mode == "new" || Azimux::AxUser.allow_username_edits %>
