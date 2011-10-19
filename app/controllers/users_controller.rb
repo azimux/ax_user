@@ -58,7 +58,7 @@ class UsersController < ApplicationController
             end.all?
           },
           :is_true => proc {
-            VerifyMailer.deliver_verify(@user)
+            VerifyMailer.verify(@user).deliver
           },
           :is_false  => proc {
             render :action => "new"
@@ -132,14 +132,14 @@ class UsersController < ApplicationController
       end
     else
       unless User.authenticate(@user.username, password)
-        @user.errors.add_to_base("The password you entered doesn't match your current password")
+        @user.errors.add(:base, "The password you entered doesn't match your current password")
         render :action => "edit_password"
         return
       end
     end
 
     if password1 != password2
-      @user.errors.add_to_base("The passwords you entered did not match.")
+      @user.errors.add(:base, "The passwords you entered did not match.")
       render :action => "edit_password"
       return
     end

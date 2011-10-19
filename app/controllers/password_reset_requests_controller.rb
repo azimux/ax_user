@@ -28,7 +28,7 @@ class PasswordResetRequestsController < ApplicationController
 
       respond_to do |format|
         if @password_reset_request.save && user.save
-          VerifyMailer.deliver_forgot_password(user)
+          VerifyMailer.forgot_password(user).deliver
 
           flash[:notice] = 'Password reset request made, go check your email!'
 

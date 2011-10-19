@@ -6,7 +6,7 @@ url_for_opts ||= {}
   You are logged in as <%= user.username -%>
   <%= link_to "Logout", logout_url -%>
 <% else -%>
-  <% form_tag login_url(url_for_opts) do -%>
+  <%= form_tag login_url(url_for_opts) do -%>
     <b>Username:</b>
     <%= text_field_tag "username", params[:username], :size=>"5" -%>
 
