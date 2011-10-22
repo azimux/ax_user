@@ -145,7 +145,7 @@ class UsersController < ApplicationController
     end
 
     if :password1.blank?
-      @user.errors.add_to_base("You must provide a password.")
+      @user.errors.add(:base, "You must provide a password.")
       render :action => "edit_password"
       return
     end

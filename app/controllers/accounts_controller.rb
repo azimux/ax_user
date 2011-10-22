@@ -7,7 +7,7 @@ class AccountsController < ApplicationController
     store_errors = proc do |msg|
       @form ||= OpenStruct.new
       @form.errors ||= ActiveRecord::Errors.new(self)
-      @form.errors.add_to_base(msg)
+      @form.errors.add(:base, msg)
     end
 
     if !@username.blank? || !params[:password].blank?
