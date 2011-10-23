@@ -27,7 +27,7 @@ module Azimux
 
     def self.included(base)
       base.helper_method :signed_in?, :user, :prep_user_variable,
-        :in_role?
+                         :in_role?
       #base.before_filter :prep_user_variable
 
       base.extend ClassMethods
@@ -53,27 +53,28 @@ module Azimux
 
     module ClassMethods
       def arrayify_options options
-        options[:except] ||= []
-
         if options[:except] && !options[:except].is_a?(Array)
           options[:except] = [options[:except]]
         end
 
-        options[:except] += [:signin, :signout]
-
         if options[:only] && !options[:only].is_a?(Array)
           options[:only] = [options[:only]]
+        end
+
+        if options[:only].blank?
+          options[:except] ||= []
+
+          if !options[:except].include?(:signin)
+            options[:except] << :signin
+          end
+          if !options[:except].include?(:signout)
+            options[:except] << :signout
+          end
         end
       end
 
       def require_login options = {}
-        if options[:only].blank?
-          options[:except] ||= []
-          if options[:except].class != Array
-            options[:except] = [options[:except]]
-          end
-          options[:except] += [:signin, :signout]
-        end
+        arrayify_options options
 
         before_filter :check_authentication, options
       end
