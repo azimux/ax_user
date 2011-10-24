@@ -21,52 +21,48 @@ class UsersController < ApplicationController
   end
 
   def create
-    User.transaction do
-      password1 = params[:user].delete :password1
-      password2 = params[:user].delete :password2
+    password1 = params[:user].delete :password1
+    password2 = params[:user].delete :password2
 
-      @user = User.new(params[:user])
-      models = Azimux::AxUser.additional_registration_models
+    @user = User.new(params[:user])
 
-      ax_multimodel_transaction models, :already_in => User do
-        objects = models.map{|m|instance_eval(&m.create_init_proc)}
-
-        #Make sure the passwords match
-        if password1 != password2
-          @user.errors.add(:password1, "The passwords you entered did not match.")
-          @user.errors.add(:password2, "The passwords you entered did not match.")
-          render :action => "new"
-          return
-        end
-
-        if password1.blank?
-          @user.errors.add(:password1, "You must provide a password.")
-          @user.errors.add(:password2, "You must verify your password.")
-          render :action => "new"
-          return
-        end
-
-        @user.verified = false
-        @user.password = password1
-
-        @user.verify_code = Azimux.generate_verify_code
-
-        ax_multimodel_if([@user] + objects,
-          :if => proc {
-            @user.save && models.map do |model|
-              instance_eval(&model.create_proc)
-            end.all?
-          },
-          :is_true => proc {
-            VerifyMailer.verify(@user).deliver
-          },
-          :is_false  => proc {
-            render :action => "new"
-            raise Azimux::MultimodelTransactions::Rollback
-          }
-        )
-      end
+    #Make sure the passwords match
+    if password1 != password2
+      @user.errors.add(:password1, "The passwords you entered did not match.")
+      @user.errors.add(:password2, "The passwords you entered did not match.")
+      render :action => "new"
+      return
     end
+
+    if password1.blank?
+      @user.errors.add(:password1, "You must provide a password.")
+      @user.errors.add(:password2, "You must verify your password.")
+      render :action => "new"
+      return
+    end
+
+    @user.verified = false
+    @user.password = password1
+
+    @user.verify_code = Azimux.generate_verify_code
+
+    models = Azimux::AxUser.additional_registration_models
+    objects = models.map{|m|instance_eval(&m.create_init_proc)}
+
+    ax_multimodel_transactional_if([@user] + objects,
+      :if => proc {
+        @user.save && models.map do |model|
+          instance_eval(&model.create_proc)
+        end.all?
+      },
+      :is_true => proc {
+        VerifyMailer.verify(@user).deliver
+      },
+      :is_false  => proc {
+        render :action => "new"
+        #raise Azimux::MultimodelTransactions::Rollback
+      }
+    )
   end
 
   def edit
@@ -91,22 +87,20 @@ class UsersController < ApplicationController
       models = Azimux::AxUser.additional_registration_models
       objects = models.map{|m|instance_eval(&m.update_init_proc)}
 
-      ax_multimodel_transaction objects, :already_in => @user do
-        ax_multimodel_if([@user] + objects,
-          :if => proc {
-            @user.update_attributes(@user.attributes.merge(params[:user])) && models.map do |model|
-              instance_eval(&model.update_proc)
-            end.all?
-          },
-          :is_true => proc {
-            flash[:notice] = "Successfully updated your account settings"
-            redirect_to edit_user_url(@user)
-          },
-          :is_false  => proc {
-            render :action => "edit"
-          }
-        )
-      end
+      ax_multimodel_transactional_if([@user] + objects,
+        :if => proc {
+          @user.update_attributes(@user.attributes.merge(params[:user])) && models.map do |model|
+            instance_eval(&model.update_proc)
+          end.all?
+        },
+        :is_true => proc {
+          flash[:notice] = "Successfully updated your account settings"
+          redirect_to edit_user_url(@user)
+        },
+        :is_false  => proc {
+          render :action => "edit"
+        }
+      )
     end
   end
 
