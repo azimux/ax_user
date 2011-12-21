@@ -1,17 +1,21 @@
 class VerifyMailer < ActionMailer::Base
   def verify(user)
-    @subject    = "Thank you for registering with #{$site_name}"
-    @user       = user
-    @recipients = user.email
-    @from       = $from_email_string
-    @sent_on    = Time.now
+    @user = user
+
+    mail(
+      :to => user.email,
+      :subject => "Thank you for registering with #{$site_name}",
+      :from => $from_email
+    )
   end
 
   def forgot_password(user)
-    @subject    = "#{$site_name} password request"
-    @user       = user
-    @recipients = user.email
-    @from       = $from_email_string
-    @sent_on    = Time.now
+    @user = user
+
+    mail(
+      :to => user.email,
+      :subject => "#{$site_name} password reset request",
+      :from => $from_email
+    )
   end
 end
