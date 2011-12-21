@@ -7,7 +7,7 @@ Please click the following link (or copy it into your browser's url bar) to veri
 <%= edit_verification_user_url(@user,
   :code => @user.verify_code,
   :host => $site_url,
-  :protocol => Azimux::AxUser.protocol($email_protocol || "http"))
+  :protocol => Azimux::AxUser.protocol($email_protocol || "http")
 ) %>
 
 Thank you.
