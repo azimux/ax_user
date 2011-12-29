@@ -6,7 +6,7 @@ class AccountsController < ApplicationController
 
     store_errors = proc do |msg|
       @form ||= OpenStruct.new
-      @form.errors ||= ActiveRecord::Errors.new(self)
+      @form.errors ||= ActiveModel::Errors.new(self)
       @form.errors.add(:base, msg)
     end
 
