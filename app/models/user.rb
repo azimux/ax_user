@@ -22,12 +22,17 @@ class User < ActiveRecord::Base
     other_user.destroy if other_user
   end
 
+  # Username can be the user's email.
+  # Returns a user if authentication was succesful, nil otherwise
   def self.authenticate(username, password)
     user = User.find(:first, :conditions => ['username = ?', username])
-    if user.blank? || Digest::SHA256.hexdigest(password + user.password_salt) != user.password_hash
-      return nil
+    user ||= User.find(:first, :conditions => ['email = ?', username])
+
+    if user
+      if Digest::SHA256.hexdigest(password + user.password_salt) == user.password_hash
+        user
+      end
     end
-    user
   end
 
   def password=(pass)

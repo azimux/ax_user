@@ -1,32 +1,24 @@
-require 'ostruct'
-
 class AccountsController < ApplicationController
   def signin
-    @username = params[:username]
+    username = params[:username]
+    password = params[:password]
 
-    store_errors = proc do |msg|
-      @form ||= OpenStruct.new
-      @form.errors ||= ActiveModel::Errors.new(self)
-      @form.errors.add(:base, msg)
-    end
+    if !username.blank? || !password.blank?
+      user = User.authenticate(username, password)
 
-    if !@username.blank? || !params[:password].blank?
-      if !(user = User.authenticate(@username, params[:password]))
-        msg = "Invalid username or password."
-        store_errors.call msg
+      unless user
+        add_errors("Invalid username or password.")
       else
         #make sure the user has validated.
         if !user.verified?
-          msg = "You need to validate your account
-              before you can sign in.  Please check your email for instructions."
-          store_errors.call msg
+          add_errors("You need to validate your account
+              before you can sign in.  Please check your email for instructions.")
         else
           #user successfully signed in
           user.last_login = (Time.zone || Time).now
           user.save!
 
           redirect_to complete_signin(user)
-          return
         end
       end
     end
@@ -46,6 +38,7 @@ class AccountsController < ApplicationController
     action = session[:intended_action]
     controller = session[:intended_controller]
     params_local = {}
+
     if session[:intended_params]
       session[:intended_params].each_pair do |key, val|
         if !params[key]
@@ -71,5 +64,13 @@ class AccountsController < ApplicationController
     end
 
     params_local.merge({:action => action, :controller => controller})
+  end
+
+  def add_errors message
+    require 'ostruct'
+
+    @form        ||= OpenStruct.new
+    @form.errors ||= ActiveModel::Errors.new(self)
+    @form.errors.add(:base, message)
   end
 end
