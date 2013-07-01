@@ -2,6 +2,9 @@ module AxUser
   class Engine < Rails::Engine
     config.autoload_paths << File.expand_path("..", __FILE__)
 
+    ActiveRecord::Migrator.migrations_paths <<
+        File.expand_path(File.join(File.dirname(__FILE__), "..", "db", "migrate"))
+
     initializer "ax_user" do
       ActionController::Base.class_eval do
         include ::Azimux::RequireLoginController
