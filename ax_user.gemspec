@@ -7,11 +7,11 @@ require "ax_user/version"
 Gem::Specification.new do |s|
   s.name        = "ax_user"
   s.version     = AxUser::VERSION
-  s.authors     = ["TODO: Your name"]
-  s.email       = ["TODO: Your email"]
-  s.homepage    = "TODO"
-  s.summary     = "TODO: Summary of AxUser."
-  s.description = "TODO: Description of AxUser."
+  s.authors     = ['azimux']
+  s.email       = ['azimux@gmail.com']
+  s.homepage    = 'http://github.com/azimux/ax_user'
+  s.summary     = 'Engine for User creation and authentication'
+  s.description = 'Engine for User creation and authentication'
 
   s.files = Dir["{app,config,db,lib}/**/*"] + ["MIT_LICENSE.txt", "Rakefile", "README"]
   s.test_files = Dir["test/**/*"]
