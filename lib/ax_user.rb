@@ -4,6 +4,7 @@ module AxUser
 
     ActiveRecord::Migrator.migrations_paths <<
         File.expand_path(File.join(File.dirname(__FILE__), "..", "db", "migrate"))
+    Rails.application.paths['db/migrate'] = ActiveRecord::Migrator.migrations_paths
 
     initializer "ax_user" do
       ActionController::Base.class_eval do
