@@ -49,24 +49,23 @@ class UsersController < ApplicationController
     models = Azimux::AxUser.additional_registration_models
     objects = models.map{|m|instance_eval(&m.create_init_proc)}
 
-    ax_multimodel_transactional_if([@user] + objects,
-      :if => proc {
-        @user.save && models.map do |model|
-          instance_eval(&model.create_proc)
-        end.all?
-      },
-      :is_true => proc {
+    User.transaction do
+      success = @user.save && models.map do |model|
+                                instance_eval(&model.create_proc)
+                              end.all?
+
+      if success
         VerifyMailer.verify(@user).deliver
-      },
-      :is_false  => proc {
+      else
         render :action => "new"
-        #raise Azimux::MultimodelTransactions::Rollback
-      }
-    )
+        raise ActiveRecord::Rollback
+      end
+    end
   end
 
   def edit
     @user = User.find(params[:id])
+
     Azimux::AxUser.additional_registration_models.each do |model|
       instance_eval(&model.edit_proc)
     end
@@ -87,20 +86,23 @@ class UsersController < ApplicationController
       models = Azimux::AxUser.additional_registration_models
       objects = models.map{|m|instance_eval(&m.update_init_proc)}
 
-      ax_multimodel_transactional_if([@user] + objects,
-        :if => proc {
-          @user.update_attributes(@user.attributes.merge(params[:user])) && models.map do |model|
-            instance_eval(&model.update_proc)
-          end.all?
-        },
-        :is_true => proc {
+      User.transaction do
+        success = @user.update_attributes(@user.attributes.merge(params[:user]))
+
+        if success
+          success = models.map do |model|
+                      instance_eval(&model.update_proc)
+                    end.all?
+        end
+
+        if success
           flash[:notice] = "Successfully updated your account settings"
           redirect_to edit_user_url(@user)
-        },
-        :is_false  => proc {
+        else
           render :action => "edit"
-        }
-      )
+          raise ActiveRecord::Rollback
+        end
+      end
     end
   end
 
